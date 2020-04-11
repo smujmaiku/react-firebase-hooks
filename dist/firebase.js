@@ -333,6 +333,7 @@ function useFirestoreDoc(path) {
         }
       }, _callee7);
     }))()["catch"](function (error) {
+      if (timeout) return;
       reject(error);
     });
 
@@ -496,6 +497,7 @@ function useFirestoreCollection(path) {
         }
       }, _callee8);
     }))()["catch"](function (error) {
+      if (timeout) return;
       reject(error);
     });
 
@@ -637,6 +639,7 @@ function useFirebaseStorageAsUrls(files) {
         }
       }, _callee9);
     }))()["catch"](function (error) {
+      if (timeout) return;
       reject(error);
     });
 

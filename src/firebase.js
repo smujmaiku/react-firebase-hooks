@@ -114,6 +114,7 @@ export function useFirestoreDoc(path) {
 			if (timeout) return;
 			resolve(doc.data());
 		})().catch((error) => {
+			if (timeout) return;
 			reject(error);
 		});
 
@@ -215,6 +216,7 @@ export function useFirestoreCollection(path, query = {}) {
 			if (timeout) return;
 			resolve(data);
 		})().catch((error) => {
+			if (timeout) return;
 			reject(error);
 		});
 
@@ -288,6 +290,7 @@ export function useFirebaseStorageAsUrls(files) {
 			}
 			resolve(map);
 		})().catch((error) => {
+			if (timeout) return;
 			reject(error);
 		});
 
