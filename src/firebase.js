@@ -52,6 +52,7 @@ export function useFirebase() {
 
 			patchState({
 				ready: true,
+				signingIn: undefined,
 				currentUser: user,
 				authId,
 			});
@@ -62,6 +63,7 @@ export function useFirebase() {
 		signInGoogle: async () => {
 			patchState({
 				ready: undefined,
+				signingIn: true,
 			});
 			try {
 				const provider = new firebase.auth.GoogleAuthProvider();
@@ -70,6 +72,7 @@ export function useFirebase() {
 			} catch (error) {
 				patchState({
 					ready: true,
+					signingIn: undefined,
 					currentUser: undefined,
 					authId: undefined,
 				});

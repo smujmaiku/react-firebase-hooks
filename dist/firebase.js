@@ -103,6 +103,7 @@ function useFirebase() {
       var authId = (email || '').split('@')[0];
       patchState({
         ready: true,
+        signingIn: undefined,
         currentUser: user,
         authId: authId
       });
@@ -117,7 +118,8 @@ function useFirebase() {
             switch (_context.prev = _context.next) {
               case 0:
                 patchState({
-                  ready: undefined
+                  ready: undefined,
+                  signingIn: true
                 });
                 _context.prev = 1;
                 provider = new _firebase["default"].auth.GoogleAuthProvider();
@@ -133,6 +135,7 @@ function useFirebase() {
                 _context.t0 = _context["catch"](1);
                 patchState({
                   ready: true,
+                  signingIn: undefined,
                   currentUser: undefined,
                   authId: undefined
                 });
