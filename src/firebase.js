@@ -5,7 +5,7 @@
  */
 
 import React, {
-	createContext, useContext, useEffect, useState,
+	createContext, useContext, useEffect, useState, useMemo,
 } from 'react';
 import propTypes from 'prop-types';
 import { usePatch, useHelper } from 'react-helper-hooks';
@@ -13,13 +13,14 @@ import firebase from 'firebase';
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
+import 'firebase/functions';
 
 export const firebaseContext = createContext();
 
 /**
  * Use firebase hooks and actions
  * @returns {Array} [
- *   {fire, auth, firestore, storage, ready, currentUser, authId},
+ *   {fire, auth, firestore, storage, functions, ready, currentUser, authId},
  *   {signInGoogle, signOut, addDoc, setDoc, patchDoc, deleteDoc}
  * ]
  */
@@ -29,6 +30,7 @@ export function useFirebase() {
 		auth,
 		firestore,
 		storage,
+		functions,
 		ready,
 	} = useContext(firebaseContext)[0];
 
@@ -37,6 +39,7 @@ export function useFirebase() {
 		auth,
 		firestore,
 		storage,
+		functions,
 	});
 
 	useEffect(() => {
@@ -52,19 +55,18 @@ export function useFirebase() {
 
 			patchState({
 				ready: true,
-				signingIn: undefined,
 				currentUser: user,
 				authId,
 			});
 		});
 	}, [auth, ready, patchState]);
 
-	const actions = {
+	const actions = useMemo(() => ({
 		signInGoogle: async () => {
 			patchState({
 				ready: undefined,
-				signingIn: true,
 			});
+
 			try {
 				const provider = new firebase.auth.GoogleAuthProvider();
 				const res = await auth.signInWithPopup(provider);
@@ -72,7 +74,6 @@ export function useFirebase() {
 			} catch (error) {
 				patchState({
 					ready: true,
-					signingIn: undefined,
 					currentUser: undefined,
 					authId: undefined,
 				});
@@ -91,7 +92,9 @@ export function useFirebase() {
 		setDoc: async (path, data) => firestore.doc(path).set(data),
 		patchDoc: async (path, data) => firestore.doc(path).set(data, { merge: true }),
 		deleteDoc: async (path) => firestore.doc(path).delete(),
-	};
+		// Include: https://github.com/firebase/quickstart-js/blob/master/messaging/firebase-messaging-sw.js
+		callFunction: async (name, data) => functions.httpsCallable(name)(data),
+	}), [auth, firestore, patchState]);
 
 	return [state, actions];
 }
@@ -322,6 +325,7 @@ export function FirebaseProvider(props) {
 			auth: fire.auth(),
 			firestore: fire.firestore(),
 			storage: fire.storage(),
+			functions: fire.functions(),
 			ready: true,
 		});
 	}, [config, patchState]);
@@ -362,14 +366,20 @@ export function AuthWall(props) {
 }
 
 AuthWall.defaultProps = {
-	loadingComponent: false,
 	promptComponent: false,
+	loadingComponent: false,
+	verifyFirestore: undefined,
+	setupComponent: false,
+	denyComponent: false,
 };
 
 AuthWall.propTypes = {
+	promptComponent: propTypes.node,
 	children: propTypes.node.isRequired,
 	loadingComponent: propTypes.node,
-	promptComponent: propTypes.node,
+	verifyFirestore: propTypes.string,
+	setupComponent: propTypes.node,
+	denyComponent: propTypes.node,
 };
 
 export default AuthWall;

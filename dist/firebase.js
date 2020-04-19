@@ -30,6 +30,8 @@ require("firebase/firestore");
 
 require("firebase/storage");
 
+require("firebase/functions");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
@@ -64,7 +66,7 @@ var firebaseContext = (0, _react.createContext)();
 /**
  * Use firebase hooks and actions
  * @returns {Array} [
- *   {fire, auth, firestore, storage, ready, currentUser, authId},
+ *   {fire, auth, firestore, storage, functions, ready, currentUser, authId},
  *   {signInGoogle, signOut, addDoc, setDoc, patchDoc, deleteDoc}
  * ]
  */
@@ -77,13 +79,15 @@ function useFirebase() {
       auth = _useContext$.auth,
       firestore = _useContext$.firestore,
       storage = _useContext$.storage,
+      functions = _useContext$.functions,
       ready = _useContext$.ready;
 
   var _usePatch = (0, _reactHelperHooks.usePatch)({
     fire: fire,
     auth: auth,
     firestore: firestore,
-    storage: storage
+    storage: storage,
+    functions: functions
   }),
       _usePatch2 = _slicedToArray(_usePatch, 2),
       state = _usePatch2[0],
@@ -103,176 +107,198 @@ function useFirebase() {
       var authId = (email || '').split('@')[0];
       patchState({
         ready: true,
-        signingIn: undefined,
         currentUser: user,
         authId: authId
       });
     });
   }, [auth, ready, patchState]);
-  var actions = {
-    signInGoogle: function () {
-      var _signInGoogle = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-        var provider, res;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                patchState({
-                  ready: undefined,
-                  signingIn: true
-                });
-                _context.prev = 1;
-                provider = new _firebase["default"].auth.GoogleAuthProvider();
-                _context.next = 5;
-                return auth.signInWithPopup(provider);
+  var actions = (0, _react.useMemo)(function () {
+    return {
+      signInGoogle: function () {
+        var _signInGoogle = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+          var provider, res;
+          return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  patchState({
+                    ready: undefined
+                  });
+                  _context.prev = 1;
+                  provider = new _firebase["default"].auth.GoogleAuthProvider();
+                  _context.next = 5;
+                  return auth.signInWithPopup(provider);
 
-              case 5:
-                res = _context.sent;
-                return _context.abrupt("return", res.user);
+                case 5:
+                  res = _context.sent;
+                  return _context.abrupt("return", res.user);
 
-              case 9:
-                _context.prev = 9;
-                _context.t0 = _context["catch"](1);
-                patchState({
-                  ready: true,
-                  signingIn: undefined,
-                  currentUser: undefined,
-                  authId: undefined
-                });
-                return _context.abrupt("return", undefined);
+                case 9:
+                  _context.prev = 9;
+                  _context.t0 = _context["catch"](1);
+                  patchState({
+                    ready: true,
+                    currentUser: undefined,
+                    authId: undefined
+                  });
+                  return _context.abrupt("return", undefined);
 
-              case 13:
-              case "end":
-                return _context.stop();
+                case 13:
+                case "end":
+                  return _context.stop();
+              }
             }
-          }
-        }, _callee, null, [[1, 9]]);
-      }));
+          }, _callee, null, [[1, 9]]);
+        }));
 
-      function signInGoogle() {
-        return _signInGoogle.apply(this, arguments);
-      }
+        function signInGoogle() {
+          return _signInGoogle.apply(this, arguments);
+        }
 
-      return signInGoogle;
-    }(),
-    signOut: function () {
-      var _signOut = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                patchState({
-                  ready: undefined,
-                  currentUser: undefined,
-                  authId: undefined
-                });
-                return _context2.abrupt("return", auth.signOut());
+        return signInGoogle;
+      }(),
+      signOut: function () {
+        var _signOut = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  patchState({
+                    ready: undefined,
+                    currentUser: undefined,
+                    authId: undefined
+                  });
+                  return _context2.abrupt("return", auth.signOut());
 
-              case 2:
-              case "end":
-                return _context2.stop();
+                case 2:
+                case "end":
+                  return _context2.stop();
+              }
             }
-          }
-        }, _callee2);
-      }));
+          }, _callee2);
+        }));
 
-      function signOut() {
-        return _signOut.apply(this, arguments);
-      }
+        function signOut() {
+          return _signOut.apply(this, arguments);
+        }
 
-      return signOut;
-    }(),
-    addDoc: function () {
-      var _addDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(path, data) {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                return _context3.abrupt("return", firestore.collection(path).add(data));
+        return signOut;
+      }(),
+      addDoc: function () {
+        var _addDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(path, data) {
+          return regeneratorRuntime.wrap(function _callee3$(_context3) {
+            while (1) {
+              switch (_context3.prev = _context3.next) {
+                case 0:
+                  return _context3.abrupt("return", firestore.collection(path).add(data));
 
-              case 1:
-              case "end":
-                return _context3.stop();
+                case 1:
+                case "end":
+                  return _context3.stop();
+              }
             }
-          }
-        }, _callee3);
-      }));
+          }, _callee3);
+        }));
 
-      function addDoc(_x, _x2) {
-        return _addDoc.apply(this, arguments);
-      }
+        function addDoc(_x, _x2) {
+          return _addDoc.apply(this, arguments);
+        }
 
-      return addDoc;
-    }(),
-    setDoc: function () {
-      var _setDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(path, data) {
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                return _context4.abrupt("return", firestore.doc(path).set(data));
+        return addDoc;
+      }(),
+      setDoc: function () {
+        var _setDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(path, data) {
+          return regeneratorRuntime.wrap(function _callee4$(_context4) {
+            while (1) {
+              switch (_context4.prev = _context4.next) {
+                case 0:
+                  return _context4.abrupt("return", firestore.doc(path).set(data));
 
-              case 1:
-              case "end":
-                return _context4.stop();
+                case 1:
+                case "end":
+                  return _context4.stop();
+              }
             }
-          }
-        }, _callee4);
-      }));
+          }, _callee4);
+        }));
 
-      function setDoc(_x3, _x4) {
-        return _setDoc.apply(this, arguments);
-      }
+        function setDoc(_x3, _x4) {
+          return _setDoc.apply(this, arguments);
+        }
 
-      return setDoc;
-    }(),
-    patchDoc: function () {
-      var _patchDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(path, data) {
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                return _context5.abrupt("return", firestore.doc(path).set(data, {
-                  merge: true
-                }));
+        return setDoc;
+      }(),
+      patchDoc: function () {
+        var _patchDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(path, data) {
+          return regeneratorRuntime.wrap(function _callee5$(_context5) {
+            while (1) {
+              switch (_context5.prev = _context5.next) {
+                case 0:
+                  return _context5.abrupt("return", firestore.doc(path).set(data, {
+                    merge: true
+                  }));
 
-              case 1:
-              case "end":
-                return _context5.stop();
+                case 1:
+                case "end":
+                  return _context5.stop();
+              }
             }
-          }
-        }, _callee5);
-      }));
+          }, _callee5);
+        }));
 
-      function patchDoc(_x5, _x6) {
-        return _patchDoc.apply(this, arguments);
-      }
+        function patchDoc(_x5, _x6) {
+          return _patchDoc.apply(this, arguments);
+        }
 
-      return patchDoc;
-    }(),
-    deleteDoc: function () {
-      var _deleteDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(path) {
-        return regeneratorRuntime.wrap(function _callee6$(_context6) {
-          while (1) {
-            switch (_context6.prev = _context6.next) {
-              case 0:
-                return _context6.abrupt("return", firestore.doc(path)["delete"]());
+        return patchDoc;
+      }(),
+      deleteDoc: function () {
+        var _deleteDoc = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(path) {
+          return regeneratorRuntime.wrap(function _callee6$(_context6) {
+            while (1) {
+              switch (_context6.prev = _context6.next) {
+                case 0:
+                  return _context6.abrupt("return", firestore.doc(path)["delete"]());
 
-              case 1:
-              case "end":
-                return _context6.stop();
+                case 1:
+                case "end":
+                  return _context6.stop();
+              }
             }
-          }
-        }, _callee6);
-      }));
+          }, _callee6);
+        }));
 
-      function deleteDoc(_x7) {
-        return _deleteDoc.apply(this, arguments);
-      }
+        function deleteDoc(_x7) {
+          return _deleteDoc.apply(this, arguments);
+        }
 
-      return deleteDoc;
-    }()
-  };
+        return deleteDoc;
+      }(),
+      // Include: https://github.com/firebase/quickstart-js/blob/master/messaging/firebase-messaging-sw.js
+      callFunction: function () {
+        var _callFunction = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(name, data) {
+          return regeneratorRuntime.wrap(function _callee7$(_context7) {
+            while (1) {
+              switch (_context7.prev = _context7.next) {
+                case 0:
+                  return _context7.abrupt("return", functions.httpsCallable(name)(data));
+
+                case 1:
+                case "end":
+                  return _context7.stop();
+              }
+            }
+          }, _callee7);
+        }));
+
+        function callFunction(_x8, _x9) {
+          return _callFunction.apply(this, arguments);
+        }
+
+        return callFunction;
+      }()
+    };
+  }, [auth, firestore, patchState]);
   return [state, actions];
 }
 /**
@@ -306,35 +332,35 @@ function useFirestoreDoc(path) {
     reset();
     var timeout = false;
 
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
       var ref, doc;
-      return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      return regeneratorRuntime.wrap(function _callee8$(_context8) {
         while (1) {
-          switch (_context7.prev = _context7.next) {
+          switch (_context8.prev = _context8.next) {
             case 0:
               ref = firestore.doc(path);
-              _context7.next = 3;
+              _context8.next = 3;
               return ref.get();
 
             case 3:
-              doc = _context7.sent;
+              doc = _context8.sent;
 
               if (!timeout) {
-                _context7.next = 6;
+                _context8.next = 6;
                 break;
               }
 
-              return _context7.abrupt("return");
+              return _context8.abrupt("return");
 
             case 6:
               resolve(doc.data());
 
             case 7:
             case "end":
-              return _context7.stop();
+              return _context8.stop();
           }
         }
-      }, _callee7);
+      }, _callee8);
     }))()["catch"](function (error) {
       if (timeout) return;
       reject(error);
@@ -465,40 +491,40 @@ function useFirestoreCollection(path) {
     reset();
     var timeout = false;
 
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
       var ref, queryRef, collection, data;
-      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      return regeneratorRuntime.wrap(function _callee9$(_context9) {
         while (1) {
-          switch (_context8.prev = _context8.next) {
+          switch (_context9.prev = _context9.next) {
             case 0:
               ref = firestore.collection(path);
               queryRef = applyCollectionQuery(ref, JSON.parse(queryStr));
-              _context8.next = 4;
+              _context9.next = 4;
               return queryRef.get();
 
             case 4:
-              collection = _context8.sent;
+              collection = _context9.sent;
               data = {};
               collection.forEach(function (doc) {
                 data[doc.id] = doc.data();
               });
 
               if (!timeout) {
-                _context8.next = 9;
+                _context9.next = 9;
                 break;
               }
 
-              return _context8.abrupt("return");
+              return _context9.abrupt("return");
 
             case 9:
               resolve(data);
 
             case 10:
             case "end":
-              return _context8.stop();
+              return _context9.stop();
           }
         }
-      }, _callee8);
+      }, _callee9);
     }))()["catch"](function (error) {
       if (timeout) return;
       reject(error);
@@ -596,40 +622,40 @@ function useFirebaseStorageAsUrls(files) {
     reset();
     var timeout = false;
 
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
       var map, _i2, _Object$values, file, url;
 
-      return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      return regeneratorRuntime.wrap(function _callee10$(_context10) {
         while (1) {
-          switch (_context9.prev = _context9.next) {
+          switch (_context10.prev = _context10.next) {
             case 0:
               map = {};
               _i2 = 0, _Object$values = Object.values(files);
 
             case 2:
               if (!(_i2 < _Object$values.length)) {
-                _context9.next = 13;
+                _context10.next = 13;
                 break;
               }
 
               file = _Object$values[_i2];
-              _context9.next = 6;
+              _context10.next = 6;
               return storage.ref(file).getDownloadURL();
 
             case 6:
-              url = _context9.sent;
+              url = _context10.sent;
               map[file] = url;
 
               if (!timeout) {
-                _context9.next = 10;
+                _context10.next = 10;
                 break;
               }
 
-              return _context9.abrupt("return");
+              return _context10.abrupt("return");
 
             case 10:
               _i2++;
-              _context9.next = 2;
+              _context10.next = 2;
               break;
 
             case 13:
@@ -637,10 +663,10 @@ function useFirebaseStorageAsUrls(files) {
 
             case 14:
             case "end":
-              return _context9.stop();
+              return _context10.stop();
           }
         }
-      }, _callee9);
+      }, _callee10);
     }))()["catch"](function (error) {
       if (timeout) return;
       reject(error);
@@ -680,6 +706,7 @@ function FirebaseProvider(props) {
       auth: fire.auth(),
       firestore: fire.firestore(),
       storage: fire.storage(),
+      functions: fire.functions(),
       ready: true
     });
   }, [config, patchState]);
@@ -723,13 +750,19 @@ function AuthWall(props) {
 }
 
 AuthWall.defaultProps = {
+  promptComponent: false,
   loadingComponent: false,
-  promptComponent: false
+  verifyFirestore: undefined,
+  setupComponent: false,
+  denyComponent: false
 };
 AuthWall.propTypes = {
+  promptComponent: _propTypes["default"].node,
   children: _propTypes["default"].node.isRequired,
   loadingComponent: _propTypes["default"].node,
-  promptComponent: _propTypes["default"].node
+  verifyFirestore: _propTypes["default"].string,
+  setupComponent: _propTypes["default"].node,
+  denyComponent: _propTypes["default"].node
 };
 var _default = AuthWall;
 exports["default"] = _default;
