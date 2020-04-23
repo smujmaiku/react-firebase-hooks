@@ -5,10 +5,10 @@
  */
 
 import React, {
-	createContext, useContext, useEffect, useState, useMemo,
+	createContext, useContext, useEffect, useMemo, useCallback,
 } from 'react';
 import propTypes from 'prop-types';
-import { usePatch, useHelper } from 'react-helper-hooks';
+import { useObject, usePatch, useHelper, usePromise } from 'react-helper-hooks';
 import firebase from 'firebase';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -105,35 +105,15 @@ export function useFirebase() {
  * @returns {Array} [state, {reload}]
  */
 export function useFirestoreDoc(path) {
-	const [{ authId, firestore }] = useFirebase();
+	const [{ firestore }] = useFirebase();
 
-	const [reload, setReload] = useState(0);
-	const [state, { reset, resolve, reject }] = useHelper();
+	const promise = useCallback(async () => {
+		const ref = firestore.doc(path);
+		const doc = await ref.get();
+		return doc.data();
+	}, [firestore, path]);
 
-	useEffect(() => {
-		reset();
-		let timeout = false;
-
-		(async () => {
-			const ref = firestore.doc(path);
-			const doc = await ref.get();
-			if (timeout) return;
-			resolve(doc.data());
-		})().catch((error) => {
-			if (timeout) return;
-			reject(error);
-		});
-
-		return () => { timeout = true; };
-	}, [firestore, authId, path, reload, reset, resolve, reject]);
-
-	const [actions] = useState({
-		reload: () => {
-			setReload(Date.now());
-		},
-	});
-
-	return [state, actions];
+	return usePromise(promise);
 }
 
 /**
@@ -199,43 +179,23 @@ export function applyCollectionQuery(collectionRef, query) {
  * @returns {Array} [state, {reload}]
  */
 export function useFirestoreCollection(path, query = {}) {
-	const [{ authId, firestore }] = useFirebase();
-	const queryStr = JSON.stringify(query);
+	const [{ firestore }] = useFirebase();
+	const queryData = useObject(query);
 
-	const [reload, setReload] = useState(0);
-	const [state, { reset, resolve, reject }] = useHelper();
+	const promise = useCallback(async () => {
+		const ref = firestore.collection(path);
+		const queryRef = applyCollectionQuery(ref, queryData);
+		const collection = await queryRef.get();
 
-	useEffect(() => {
-		reset();
-		let timeout = false;
-
-		(async () => {
-			const ref = firestore.collection(path);
-			const queryRef = applyCollectionQuery(ref, JSON.parse(queryStr));
-			const collection = await queryRef.get();
-
-			const data = {};
-			collection.forEach((doc) => {
-				data[doc.id] = doc.data();
-			});
-
-			if (timeout) return;
-			resolve(data);
-		})().catch((error) => {
-			if (timeout) return;
-			reject(error);
+		const data = {};
+		collection.forEach((doc) => {
+			data[doc.id] = doc.data();
 		});
 
-		return () => { timeout = true; };
-	}, [firestore, authId, path, queryStr, reload, reset, resolve, reject]);
+		return data;
+	}, [path, queryData, firestore]);
 
-	const [actions] = useState({
-		reload: () => {
-			setReload(Date.now());
-		},
-	});
-
-	return [state, actions];
+	return usePromise(promise);
 }
 
 /**
@@ -249,14 +209,14 @@ export function useFirestoreCollection(path, query = {}) {
  */
 export function useFirestoreCollectionRT(path, query = {}) {
 	const [{ authId, firestore }] = useFirebase();
-	const queryStr = JSON.stringify(query);
+	const queryData = useObject(query);
 
 	const [state, { reset, resolve, reject }] = useHelper();
 
 	useEffect(() => {
 		reset();
 		const ref = firestore.collection(path);
-		const queryRef = applyCollectionQuery(ref, JSON.parse(queryStr));
+		const queryRef = applyCollectionQuery(ref, queryData);
 
 		return queryRef.onSnapshot((snp) => {
 			const list = {};
@@ -267,49 +227,32 @@ export function useFirestoreCollectionRT(path, query = {}) {
 		}, (error) => {
 			reject(error);
 		});
-	}, [firestore, authId, path, queryStr, reset, resolve, reject]);
+	}, [firestore, authId, path, queryData, reset, resolve, reject]);
 
 	return [state];
 }
 
 /**
- * Get Firestore collection hook
- * @param {string} path
+ * Get storage urls
+ * @param {Array|Object} files
  * @param {Array} [state]
  */
 export function useFirebaseStorageAsUrls(files) {
-	const [{ authId, storage }] = useFirebase();
+	const [{ storage }] = useFirebase();
 
-	const [reload, setReload] = useState(0);
-	const [state, { reset, resolve, reject }] = useHelper();
+	const fileList = useObject(files);
 
-	useEffect(() => {
-		reset();
-		let timeout = false;
+	const promise = useCallback(async () => {
+		const isArray = fileList instanceof Array;
+		const map = {};
+		for (const [key, file] of Object.entries(fileList)) {
+			const url = await storage.ref(file).getDownloadURL();
+			map[isArray ? file : key] = url;
+		}
+		return map;
+	}, [fileList, storage]);
 
-		(async () => {
-			const map = {};
-			for (const file of Object.values(files)) {
-				const url = await storage.ref(file).getDownloadURL();
-				map[file] = url;
-				if (timeout) return;
-			}
-			resolve(map);
-		})().catch((error) => {
-			if (timeout) return;
-			reject(error);
-		});
-
-		return () => { timeout = true; };
-	}, [storage, authId, files, reset, resolve, reject, reload]);
-
-	const [actions] = useState({
-		reload: () => {
-			setReload(Date.now());
-		},
-	});
-
-	return [state, actions];
+	return usePromise(promise);
 }
 
 export function FirebaseProvider(props) {

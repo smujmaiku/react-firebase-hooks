@@ -311,75 +311,30 @@ function useFirebase() {
 function useFirestoreDoc(path) {
   var _useFirebase = useFirebase(),
       _useFirebase2 = _slicedToArray(_useFirebase, 1),
-      _useFirebase2$ = _useFirebase2[0],
-      authId = _useFirebase2$.authId,
-      firestore = _useFirebase2$.firestore;
+      firestore = _useFirebase2[0].firestore;
 
-  var _useState = (0, _react.useState)(0),
-      _useState2 = _slicedToArray(_useState, 2),
-      reload = _useState2[0],
-      setReload = _useState2[1];
+  var promise = (0, _react.useCallback)( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+    var ref, doc;
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            ref = firestore.doc(path);
+            _context8.next = 3;
+            return ref.get();
 
-  var _useHelper = (0, _reactHelperHooks.useHelper)(),
-      _useHelper2 = _slicedToArray(_useHelper, 2),
-      state = _useHelper2[0],
-      _useHelper2$ = _useHelper2[1],
-      reset = _useHelper2$.reset,
-      resolve = _useHelper2$.resolve,
-      reject = _useHelper2$.reject;
+          case 3:
+            doc = _context8.sent;
+            return _context8.abrupt("return", doc.data());
 
-  (0, _react.useEffect)(function () {
-    reset();
-    var timeout = false;
-
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
-      var ref, doc;
-      return regeneratorRuntime.wrap(function _callee8$(_context8) {
-        while (1) {
-          switch (_context8.prev = _context8.next) {
-            case 0:
-              ref = firestore.doc(path);
-              _context8.next = 3;
-              return ref.get();
-
-            case 3:
-              doc = _context8.sent;
-
-              if (!timeout) {
-                _context8.next = 6;
-                break;
-              }
-
-              return _context8.abrupt("return");
-
-            case 6:
-              resolve(doc.data());
-
-            case 7:
-            case "end":
-              return _context8.stop();
-          }
+          case 5:
+          case "end":
+            return _context8.stop();
         }
-      }, _callee8);
-    }))()["catch"](function (error) {
-      if (timeout) return;
-      reject(error);
-    });
-
-    return function () {
-      timeout = true;
-    };
-  }, [firestore, authId, path, reload, reset, resolve, reject]);
-
-  var _useState3 = (0, _react.useState)({
-    reload: function reload() {
-      setReload(Date.now());
-    }
-  }),
-      _useState4 = _slicedToArray(_useState3, 1),
-      actions = _useState4[0];
-
-  return [state, actions];
+      }
+    }, _callee8);
+  })), [firestore, path]);
+  return (0, _reactHelperHooks.usePromise)(promise);
 }
 /**
  * Subscribe Firestore doc hook
@@ -395,13 +350,13 @@ function useFirestoreDocRT(path) {
       authId = _useFirebase4$.authId,
       firestore = _useFirebase4$.firestore;
 
-  var _useHelper3 = (0, _reactHelperHooks.useHelper)(),
-      _useHelper4 = _slicedToArray(_useHelper3, 2),
-      state = _useHelper4[0],
-      _useHelper4$ = _useHelper4[1],
-      reset = _useHelper4$.reset,
-      resolve = _useHelper4$.resolve,
-      reject = _useHelper4$.reject;
+  var _useHelper = (0, _reactHelperHooks.useHelper)(),
+      _useHelper2 = _slicedToArray(_useHelper, 2),
+      state = _useHelper2[0],
+      _useHelper2$ = _useHelper2[1],
+      reset = _useHelper2$.reset,
+      resolve = _useHelper2$.resolve,
+      reject = _useHelper2$.reject;
 
   (0, _react.useEffect)(function () {
     reset();
@@ -468,82 +423,36 @@ function useFirestoreCollection(path) {
 
   var _useFirebase5 = useFirebase(),
       _useFirebase6 = _slicedToArray(_useFirebase5, 1),
-      _useFirebase6$ = _useFirebase6[0],
-      authId = _useFirebase6$.authId,
-      firestore = _useFirebase6$.firestore;
+      firestore = _useFirebase6[0].firestore;
 
-  var queryStr = JSON.stringify(query);
+  var queryData = (0, _reactHelperHooks.useObject)(query);
+  var promise = (0, _react.useCallback)( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+    var ref, queryRef, collection, data;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            ref = firestore.collection(path);
+            queryRef = applyCollectionQuery(ref, queryData);
+            _context9.next = 4;
+            return queryRef.get();
 
-  var _useState5 = (0, _react.useState)(0),
-      _useState6 = _slicedToArray(_useState5, 2),
-      reload = _useState6[0],
-      setReload = _useState6[1];
+          case 4:
+            collection = _context9.sent;
+            data = {};
+            collection.forEach(function (doc) {
+              data[doc.id] = doc.data();
+            });
+            return _context9.abrupt("return", data);
 
-  var _useHelper5 = (0, _reactHelperHooks.useHelper)(),
-      _useHelper6 = _slicedToArray(_useHelper5, 2),
-      state = _useHelper6[0],
-      _useHelper6$ = _useHelper6[1],
-      reset = _useHelper6$.reset,
-      resolve = _useHelper6$.resolve,
-      reject = _useHelper6$.reject;
-
-  (0, _react.useEffect)(function () {
-    reset();
-    var timeout = false;
-
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
-      var ref, queryRef, collection, data;
-      return regeneratorRuntime.wrap(function _callee9$(_context9) {
-        while (1) {
-          switch (_context9.prev = _context9.next) {
-            case 0:
-              ref = firestore.collection(path);
-              queryRef = applyCollectionQuery(ref, JSON.parse(queryStr));
-              _context9.next = 4;
-              return queryRef.get();
-
-            case 4:
-              collection = _context9.sent;
-              data = {};
-              collection.forEach(function (doc) {
-                data[doc.id] = doc.data();
-              });
-
-              if (!timeout) {
-                _context9.next = 9;
-                break;
-              }
-
-              return _context9.abrupt("return");
-
-            case 9:
-              resolve(data);
-
-            case 10:
-            case "end":
-              return _context9.stop();
-          }
+          case 8:
+          case "end":
+            return _context9.stop();
         }
-      }, _callee9);
-    }))()["catch"](function (error) {
-      if (timeout) return;
-      reject(error);
-    });
-
-    return function () {
-      timeout = true;
-    };
-  }, [firestore, authId, path, queryStr, reload, reset, resolve, reject]);
-
-  var _useState7 = (0, _react.useState)({
-    reload: function reload() {
-      setReload(Date.now());
-    }
-  }),
-      _useState8 = _slicedToArray(_useState7, 1),
-      actions = _useState8[0];
-
-  return [state, actions];
+      }
+    }, _callee9);
+  })), [path, queryData, firestore]);
+  return (0, _reactHelperHooks.usePromise)(promise);
 }
 /**
  * Subscribe Firestore collection hook
@@ -565,20 +474,20 @@ function useFirestoreCollectionRT(path) {
       authId = _useFirebase8$.authId,
       firestore = _useFirebase8$.firestore;
 
-  var queryStr = JSON.stringify(query);
+  var queryData = (0, _reactHelperHooks.useObject)(query);
 
-  var _useHelper7 = (0, _reactHelperHooks.useHelper)(),
-      _useHelper8 = _slicedToArray(_useHelper7, 2),
-      state = _useHelper8[0],
-      _useHelper8$ = _useHelper8[1],
-      reset = _useHelper8$.reset,
-      resolve = _useHelper8$.resolve,
-      reject = _useHelper8$.reject;
+  var _useHelper3 = (0, _reactHelperHooks.useHelper)(),
+      _useHelper4 = _slicedToArray(_useHelper3, 2),
+      state = _useHelper4[0],
+      _useHelper4$ = _useHelper4[1],
+      reset = _useHelper4$.reset,
+      resolve = _useHelper4$.resolve,
+      reject = _useHelper4$.reject;
 
   (0, _react.useEffect)(function () {
     reset();
     var ref = firestore.collection(path);
-    var queryRef = applyCollectionQuery(ref, JSON.parse(queryStr));
+    var queryRef = applyCollectionQuery(ref, queryData);
     return queryRef.onSnapshot(function (snp) {
       var list = {};
       snp.forEach(function (doc) {
@@ -588,12 +497,12 @@ function useFirestoreCollectionRT(path) {
     }, function (error) {
       reject(error);
     });
-  }, [firestore, authId, path, queryStr, reset, resolve, reject]);
+  }, [firestore, authId, path, queryData, reset, resolve, reject]);
   return [state];
 }
 /**
- * Get Firestore collection hook
- * @param {string} path
+ * Get storage urls
+ * @param {Array|Object} files
  * @param {Array} [state]
  */
 
@@ -601,91 +510,50 @@ function useFirestoreCollectionRT(path) {
 function useFirebaseStorageAsUrls(files) {
   var _useFirebase9 = useFirebase(),
       _useFirebase10 = _slicedToArray(_useFirebase9, 1),
-      _useFirebase10$ = _useFirebase10[0],
-      authId = _useFirebase10$.authId,
-      storage = _useFirebase10$.storage;
+      storage = _useFirebase10[0].storage;
 
-  var _useState9 = (0, _react.useState)(0),
-      _useState10 = _slicedToArray(_useState9, 2),
-      reload = _useState10[0],
-      setReload = _useState10[1];
+  var fileList = (0, _reactHelperHooks.useObject)(files);
+  var promise = (0, _react.useCallback)( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
+    var isArray, map, _i2, _Object$entries, _Object$entries$_i, key, file, url;
 
-  var _useHelper9 = (0, _reactHelperHooks.useHelper)(),
-      _useHelper10 = _slicedToArray(_useHelper9, 2),
-      state = _useHelper10[0],
-      _useHelper10$ = _useHelper10[1],
-      reset = _useHelper10$.reset,
-      resolve = _useHelper10$.resolve,
-      reject = _useHelper10$.reject;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            isArray = fileList instanceof Array;
+            map = {};
+            _i2 = 0, _Object$entries = Object.entries(fileList);
 
-  (0, _react.useEffect)(function () {
-    reset();
-    var timeout = false;
-
-    _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
-      var map, _i2, _Object$values, file, url;
-
-      return regeneratorRuntime.wrap(function _callee10$(_context10) {
-        while (1) {
-          switch (_context10.prev = _context10.next) {
-            case 0:
-              map = {};
-              _i2 = 0, _Object$values = Object.values(files);
-
-            case 2:
-              if (!(_i2 < _Object$values.length)) {
-                _context10.next = 13;
-                break;
-              }
-
-              file = _Object$values[_i2];
-              _context10.next = 6;
-              return storage.ref(file).getDownloadURL();
-
-            case 6:
-              url = _context10.sent;
-              map[file] = url;
-
-              if (!timeout) {
-                _context10.next = 10;
-                break;
-              }
-
-              return _context10.abrupt("return");
-
-            case 10:
-              _i2++;
-              _context10.next = 2;
+          case 3:
+            if (!(_i2 < _Object$entries.length)) {
+              _context10.next = 12;
               break;
+            }
 
-            case 13:
-              resolve(map);
+            _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), key = _Object$entries$_i[0], file = _Object$entries$_i[1];
+            _context10.next = 7;
+            return storage.ref(file).getDownloadURL();
 
-            case 14:
-            case "end":
-              return _context10.stop();
-          }
+          case 7:
+            url = _context10.sent;
+            map[isArray ? file : key] = url;
+
+          case 9:
+            _i2++;
+            _context10.next = 3;
+            break;
+
+          case 12:
+            return _context10.abrupt("return", map);
+
+          case 13:
+          case "end":
+            return _context10.stop();
         }
-      }, _callee10);
-    }))()["catch"](function (error) {
-      if (timeout) return;
-      reject(error);
-    });
-
-    return function () {
-      timeout = true;
-    };
-  }, [storage, authId, files, reset, resolve, reject, reload]);
-
-  var _useState11 = (0, _react.useState)({
-    reload: function reload() {
-      setReload(Date.now());
-    }
-  }),
-      _useState12 = _slicedToArray(_useState11, 1),
-      actions = _useState12[0];
-
-  return [state, actions];
+      }
+    }, _callee10);
+  })), [fileList, storage]);
+  return (0, _reactHelperHooks.usePromise)(promise);
 }
 
 function FirebaseProvider(props) {
