@@ -25,14 +25,14 @@ export const firebaseContext = createContext();
  * ]
  */
 export function useFirebase() {
-	const {
+	const [{
 		fire,
 		auth,
 		firestore,
 		storage,
 		functions,
 		ready,
-	} = useContext(firebaseContext)[0];
+	}] = useContext(firebaseContext);
 
 	const [state, patchState] = usePatch({
 		fire,
@@ -311,18 +311,10 @@ export function AuthWall(props) {
 AuthWall.defaultProps = {
 	promptComponent: false,
 	loadingComponent: false,
-	verifyFirestore: undefined,
-	setupComponent: false,
-	denyComponent: false,
 };
 
 AuthWall.propTypes = {
-	promptComponent: propTypes.node,
 	children: propTypes.node.isRequired,
+	promptComponent: propTypes.node,
 	loadingComponent: propTypes.node,
-	verifyFirestore: propTypes.string,
-	setupComponent: propTypes.node,
-	denyComponent: propTypes.node,
 };
-
-export default AuthWall;

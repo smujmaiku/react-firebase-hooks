@@ -14,7 +14,7 @@ exports.useFirestoreCollectionRT = useFirestoreCollectionRT;
 exports.useFirebaseStorageAsUrls = useFirebaseStorageAsUrls;
 exports.FirebaseProvider = FirebaseProvider;
 exports.AuthWall = AuthWall;
-exports["default"] = exports.firebaseContext = void 0;
+exports.firebaseContext = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
@@ -74,13 +74,15 @@ var firebaseContext = (0, _react.createContext)();
 exports.firebaseContext = firebaseContext;
 
 function useFirebase() {
-  var _useContext$ = (0, _react.useContext)(firebaseContext)[0],
-      fire = _useContext$.fire,
-      auth = _useContext$.auth,
-      firestore = _useContext$.firestore,
-      storage = _useContext$.storage,
-      functions = _useContext$.functions,
-      ready = _useContext$.ready;
+  var _useContext = (0, _react.useContext)(firebaseContext),
+      _useContext2 = _slicedToArray(_useContext, 1),
+      _useContext2$ = _useContext2[0],
+      fire = _useContext2$.fire,
+      auth = _useContext2$.auth,
+      firestore = _useContext2$.firestore,
+      storage = _useContext2$.storage,
+      functions = _useContext2$.functions,
+      ready = _useContext2$.ready;
 
   var _usePatch = (0, _reactHelperHooks.usePatch)({
     fire: fire,
@@ -619,18 +621,10 @@ function AuthWall(props) {
 
 AuthWall.defaultProps = {
   promptComponent: false,
-  loadingComponent: false,
-  verifyFirestore: undefined,
-  setupComponent: false,
-  denyComponent: false
+  loadingComponent: false
 };
 AuthWall.propTypes = {
-  promptComponent: _propTypes["default"].node,
   children: _propTypes["default"].node.isRequired,
-  loadingComponent: _propTypes["default"].node,
-  verifyFirestore: _propTypes["default"].string,
-  setupComponent: _propTypes["default"].node,
-  denyComponent: _propTypes["default"].node
+  promptComponent: _propTypes["default"].node,
+  loadingComponent: _propTypes["default"].node
 };
-var _default = AuthWall;
-exports["default"] = _default;
